@@ -15,14 +15,14 @@ void delay(volatile unsigned int time) {
 }
 
 int main(void) {
-    // 1. Enable clock to GPIOA
+    // Enable clock to GPIOA
     RCC_AHBENR |= (1 << 17);  // Bit 17 = IOPAEN
 
-    // 2. Set GPIOA pin 5 to general-purpose output mode
-    GPIOA_MODER &= ~(3 << (LED_PIN * 2)); // Clear mode bits
-    GPIOA_MODER |=  (1 << (LED_PIN * 2)); // Set to output mode (01)
+    // Set GPIOA pin 5 to general-purpose output mode
+    // LED is on Port A pin 5
+    GPIOA_MODER |=  (01 << LED_PIN * 2); // Set to output mode (01)
 
-    // 3. Toggle LED
+    // Toggle LED
     while (1) {
         GPIOA_ODR ^= (1 << LED_PIN); // Toggle pin
         delay(1000);
