@@ -19,5 +19,4 @@ void LCD_DrawString(const char *str, uint16_t x, uint16_t y, uint16_t fg, uint16
 void LCD_DrawImage(const uint16_t *img, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 uint8_t Joystick_Read(void);
 
-
 #endif

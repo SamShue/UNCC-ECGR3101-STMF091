@@ -265,6 +265,19 @@ void LCD_Init(void) {
 
     // Turn backlight on
     GPIOA->BSRR = (1 << 8);
+
+    // Joystick pins: PB0, PB4, PB6, PC0, PC7 as inputs with pull-up
+	GPIOB->MODER &= ~(0x3 << (0*2));  // PB0 input
+	GPIOB->MODER &= ~(0x3 << (4*2));  // PB4 input
+	GPIOB->MODER &= ~(0x3 << (6*2));  // PB6 input
+	GPIOC->MODER &= ~(0x3 << (0*2));  // PC0 input
+	GPIOC->MODER &= ~(0x3 << (7*2));  // PC7 input
+	// Enable pull-up on each (PUPDR: 01 = pull-up)
+	GPIOB->PUPDR &= ~(0x3 << (0*2)); GPIOB->PUPDR |= (0x1 << (0*2));  // PB0 pull-up
+	GPIOB->PUPDR &= ~(0x3 << (4*2)); GPIOB->PUPDR |= (0x1 << (4*2));  // PB4 pull-up
+	GPIOB->PUPDR &= ~(0x3 << (6*2)); GPIOB->PUPDR |= (0x1 << (6*2));  // PB6 pull-up
+	GPIOC->PUPDR &= ~(0x3 << (0*2)); GPIOC->PUPDR |= (0x1 << (0*2));  // PC0 pull-up
+	GPIOC->PUPDR &= ~(0x3 << (7*2)); GPIOC->PUPDR |= (0x1 << (7*2));  // PC7 pull-up
 }
 
 void LCD_Clear(uint16_t color) {
@@ -308,13 +321,24 @@ void LCD_DrawImage(const uint16_t *img, uint16_t x, uint16_t y, uint16_t w, uint
     LCD_CS_HIGH();
 }
 
+// Define joystick pins and ports (active low inputs)
+#define JOY_UP_PORT      GPIOC
+#define JOY_UP_PIN       0     // PC0
+#define JOY_DOWN_PORT    GPIOB
+#define JOY_DOWN_PIN     4     // PB4
+#define JOY_LEFT_PORT    GPIOB
+#define JOY_LEFT_PIN     6     // PB6
+#define JOY_RIGHT_PORT   GPIOB
+#define JOY_RIGHT_PIN    0     // PB0
+#define JOY_CENTER_PORT  GPIOC
+#define JOY_CENTER_PIN   7     // PC7
+
 uint8_t Joystick_Read(void) {
     uint8_t state = 0;
-    // GPIOC: PC0=SEL, PC1=DOWN, PC2=LEFT, PC3=RIGHT, PC5=UP
-    if (!(GPIOC->IDR & (1 << 3))) state |= JOY_RIGHT;
-    if (!(GPIOC->IDR & (1 << 2))) state |= JOY_LEFT;
-    if (!(GPIOC->IDR & (1 << 5))) state |= JOY_UP;
-    if (!(GPIOC->IDR & (1 << 1))) state |= JOY_DOWN;
-    if (!(GPIOC->IDR & (1 << 0))) state |= JOY_CENTER;
+    if (!(JOY_LEFT_PORT->IDR & (1u << JOY_LEFT_PIN)))    state |= JOY_LEFT;    // PB6
+    if (!(JOY_RIGHT_PORT->IDR & (1u << JOY_RIGHT_PIN)))  state |= JOY_RIGHT;   // PB0
+    if (!(JOY_UP_PORT->IDR & (1u << JOY_UP_PIN)))        state |= JOY_UP;      // PC0
+    if (!(JOY_DOWN_PORT->IDR & (1u << JOY_DOWN_PIN)))    state |= JOY_DOWN;    // PB4
+    if (!(JOY_CENTER_PORT->IDR & (1u << JOY_CENTER_PIN))) state |= JOY_CENTER; // PC7
     return state;
 }
